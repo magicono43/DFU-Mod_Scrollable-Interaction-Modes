@@ -7,6 +7,7 @@
     "ModDescription": "Cycle through interaction modes by scrolling the mouse-wheel up and down.",
     "GUID": "f243399e-1850-41d2-bdab-1369c452680e",
     "Files": [
+        "Assets/Game/Mods/DFU-Mod_Scrollable-Interaction-Modes/modsettings.json",
         "Assets/Game/Mods/DFU-Mod_Scrollable-Interaction-Modes/Scripts/ScrollableInteractionModesMain.cs"
     ],
     "Dependencies": []

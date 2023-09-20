@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/19/2023, 9:30 PM
-// Last Edit:		9/20/2023, 6:20 AM
+// Last Edit:		9/20/2023, 3:30 PM
 // Version:			1.00
 // Special Thanks:  
 // Modifier:
@@ -13,6 +13,7 @@ using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
 using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallWorkshop;
+using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
 
 namespace ScrollableInteractionModes
 {
@@ -22,12 +23,17 @@ namespace ScrollableInteractionModes
 
         static Mod mod;
 
+        // Options
+        public static bool ReverseCycleDirection { get; set; }
+
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
         {
             mod = initParams.Mod;
             var go = new GameObject(mod.Title);
             go.AddComponent<ScrollableInteractionModesMain>(); // Add script to the scene.
+
+            mod.LoadSettingsCallback = LoadSettings; // To enable use of the "live settings changes" feature in-game.
 
             mod.IsReady = true;
         }
@@ -38,7 +44,14 @@ namespace ScrollableInteractionModes
 
             Instance = this;
 
+            mod.LoadSettings();
+
             Debug.Log("Finished mod init: Scrollable Interaction Modes");
+        }
+
+        private static void LoadSettings(ModSettings modSettings, ModSettingsChange change)
+        {
+            ReverseCycleDirection = mod.GetSettings().GetValue<bool>("GeneralSettings", "ReverseCycleDirections");
         }
 
         private void Update()
@@ -50,10 +63,20 @@ namespace ScrollableInteractionModes
             float mouseScroll = Input.GetAxis("Mouse ScrollWheel");
             if (mouseScroll != 0)
             {
-                if (mouseScroll > 0)
-                    NextInteractionMode();
-                else if (mouseScroll < 0)
-                    PreviousInteractionMode();
+                if (ReverseCycleDirection)
+                {
+                    if (mouseScroll > 0)
+                        PreviousInteractionMode();
+                    else if (mouseScroll < 0)
+                        NextInteractionMode();
+                }
+                else
+                {
+                    if (mouseScroll > 0)
+                        NextInteractionMode();
+                    else if (mouseScroll < 0)
+                        PreviousInteractionMode();
+                }
             }
         }
 
