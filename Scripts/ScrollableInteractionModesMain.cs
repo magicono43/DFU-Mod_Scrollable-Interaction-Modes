@@ -3,8 +3,8 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/19/2023, 9:30 PM
-// Last Edit:		9/20/2023, 3:30 PM
-// Version:			1.00
+// Last Edit:		3/20/2024, 1:30 AM
+// Version:			1.10
 // Special Thanks:  
 // Modifier:
 
@@ -14,6 +14,7 @@ using DaggerfallWorkshop.Game.Utility.ModSupport;
 using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
+using System;
 
 namespace ScrollableInteractionModes
 {
@@ -23,8 +24,24 @@ namespace ScrollableInteractionModes
 
         static Mod mod;
 
-        // Options
+        // General Options
         public static bool ReverseCycleDirection { get; set; }
+        public static bool ModeLooping { get; set; }
+
+        // Ignore Modes Options
+        public static bool IgnoreModes { get; set; }
+        public static bool StealMode { get; set; }
+        public static bool GrabMode { get; set; }
+        public static bool InfoMode { get; set; }
+        public static bool TalkMode { get; set; }
+
+        // Misc Options
+        public static bool AllowMouseWheelCycling { get; set; }
+        public static bool AllowKeyPressCycling { get; set; }
+        public static KeyCode CycleModeKey { get; set; }
+
+        // Variables
+        public static bool[] interactModes = { true, true, true, true }; // Steal, Grab, Info, Talk
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -52,6 +69,32 @@ namespace ScrollableInteractionModes
         private static void LoadSettings(ModSettings modSettings, ModSettingsChange change)
         {
             ReverseCycleDirection = mod.GetSettings().GetValue<bool>("GeneralSettings", "ReverseCycleDirections");
+            ModeLooping = mod.GetSettings().GetValue<bool>("GeneralSettings", "AllowModeLooping");
+
+            IgnoreModes = mod.GetSettings().GetValue<bool>("IgnoreModesSettings", "EnableIgnoreModes");
+            StealMode = mod.GetSettings().GetValue<bool>("IgnoreModesSettings", "IgnoreStealMode");
+            GrabMode = mod.GetSettings().GetValue<bool>("IgnoreModesSettings", "IgnoreGrabMode");
+            InfoMode = mod.GetSettings().GetValue<bool>("IgnoreModesSettings", "IgnoreInfoMode");
+            TalkMode = mod.GetSettings().GetValue<bool>("IgnoreModesSettings", "IgnoreTalkMode");
+
+            AllowMouseWheelCycling = mod.GetSettings().GetValue<bool>("MiscSettings", "EnableMouseWheelCycling");
+            AllowKeyPressCycling = mod.GetSettings().GetValue<bool>("MiscSettings", "EnableKeyPressCycling");
+            var cycleKeyText = mod.GetSettings().GetValue<string>("MiscSettings", "CycleModesKey");
+            if (Enum.TryParse(cycleKeyText, out KeyCode result))
+                CycleModeKey = result;
+            else
+            {
+                CycleModeKey = KeyCode.R;
+                Debug.Log("Scrollable Interaction Modes: Invalid cycle modes keybind detected. Setting default.");
+            }
+
+            if (IgnoreModes)
+            {
+                interactModes[0] = StealMode ? false : true;
+                interactModes[1] = GrabMode ? false : true;
+                interactModes[2] = InfoMode ? false : true;
+                interactModes[3] = TalkMode ? false : true;
+            }
         }
 
         private void Update()
@@ -60,78 +103,85 @@ namespace ScrollableInteractionModes
                 return;
 
             // Handle mouse wheel
-            float mouseScroll = Input.GetAxis("Mouse ScrollWheel");
-            if (mouseScroll != 0)
+            if (AllowMouseWheelCycling)
+            {
+                float mouseScroll = Input.GetAxis("Mouse ScrollWheel");
+                if (mouseScroll != 0)
+                {
+                    if (ReverseCycleDirection)
+                    {
+                        if (mouseScroll > 0)
+                            CycleInteractionMode(false);
+                        else if (mouseScroll < 0)
+                            CycleInteractionMode(true);
+                    }
+                    else
+                    {
+                        if (mouseScroll > 0)
+                            CycleInteractionMode(true);
+                        else if (mouseScroll < 0)
+                            CycleInteractionMode(false);
+                    }
+                }
+            }
+
+            // Handle key presses
+            if (AllowKeyPressCycling && InputManager.Instance.GetAnyKeyDown() == CycleModeKey)
             {
                 if (ReverseCycleDirection)
                 {
-                    if (mouseScroll > 0)
-                        PreviousInteractionMode();
-                    else if (mouseScroll < 0)
-                        NextInteractionMode();
+                    CycleInteractionMode(false);
                 }
                 else
                 {
-                    if (mouseScroll > 0)
-                        NextInteractionMode();
-                    else if (mouseScroll < 0)
-                        PreviousInteractionMode();
+                    CycleInteractionMode(true);
+                }
+            }    
+        }
+
+        void CycleInteractionMode(bool forward)
+        {
+            PlayerActivateModes nextMode = GameManager.Instance.PlayerActivate.CurrentMode;
+            PlayerActivateModes currentMode = nextMode;
+            int currentModeIndex = (int)currentMode;
+
+            // Cycle to next interaction mode. Order is Steal > Grab > Info > Talk then wraps back to Steal, if looping is enabled.
+            if (forward)
+            {
+                for (int i = 0; i < interactModes.Length; i++)
+                {
+                    currentModeIndex = Mathf.Clamp(currentModeIndex + 1, 0, 3);
+                    if (interactModes[currentModeIndex]) { nextMode = (PlayerActivateModes)currentModeIndex; break; }
+                }
+
+                if (ModeLooping && nextMode == currentMode)
+                {
+                    currentModeIndex = 0;
+                    for (int i = 0; i < interactModes.Length; i++)
+                    {
+                        currentModeIndex = Mathf.Clamp(currentModeIndex + 1, 0, 3);
+                        if (interactModes[currentModeIndex]) { nextMode = (PlayerActivateModes)currentModeIndex; break; }
+                    }
                 }
             }
-        }
-
-        /// <summary>
-        /// Cycle to next interaction mode.
-        /// Order is Steal > Grab > Info > Talk then wraps back to Steal.
-        /// </summary>
-        void NextInteractionMode()
-        {
-            PlayerActivateModes nextMode;
-            switch (GameManager.Instance.PlayerActivate.CurrentMode)
+            // Cycle to previous interaction mode. Order is Talk > Info > Grab > Steal then wraps back to Talk, if looping is enabled.
+            else
             {
-                case PlayerActivateModes.Steal:
-                    nextMode = PlayerActivateModes.Grab;
-                    break;
-                case PlayerActivateModes.Grab:
-                    nextMode = PlayerActivateModes.Info;
-                    break;
-                case PlayerActivateModes.Info:
-                    nextMode = PlayerActivateModes.Talk;
-                    break;
-                case PlayerActivateModes.Talk:
-                    nextMode = PlayerActivateModes.Steal;
-                    break;
-                default:
-                    nextMode = GameManager.Instance.PlayerActivate.CurrentMode;
-                    break;
-            }
-            GameManager.Instance.PlayerActivate.ChangeInteractionMode(nextMode);
-        }
+                for (int i = 0; i < interactModes.Length; i++)
+                {
+                    currentModeIndex = Mathf.Clamp(currentModeIndex - 1, 0, 3);
+                    if (interactModes[currentModeIndex]) { nextMode = (PlayerActivateModes)currentModeIndex; break; }
+                }
 
-        /// <summary>
-        /// Cycle to previous interaction mode.
-        /// Order is Talk > Info > Grab > Steal then wraps back to Talk.
-        /// </summary>
-        void PreviousInteractionMode()
-        {
-            PlayerActivateModes nextMode;
-            switch (GameManager.Instance.PlayerActivate.CurrentMode)
-            {
-                case PlayerActivateModes.Talk:
-                    nextMode = PlayerActivateModes.Info;
-                    break;
-                case PlayerActivateModes.Info:
-                    nextMode = PlayerActivateModes.Grab;
-                    break;
-                case PlayerActivateModes.Grab:
-                    nextMode = PlayerActivateModes.Steal;
-                    break;
-                case PlayerActivateModes.Steal:
-                    nextMode = PlayerActivateModes.Talk;
-                    break;
-                default:
-                    nextMode = GameManager.Instance.PlayerActivate.CurrentMode;
-                    break;
+                if (ModeLooping && nextMode == currentMode)
+                {
+                    currentModeIndex = 3;
+                    for (int i = 0; i < interactModes.Length; i++)
+                    {
+                        currentModeIndex = Mathf.Clamp(currentModeIndex - 1, 0, 3);
+                        if (interactModes[currentModeIndex]) { nextMode = (PlayerActivateModes)currentModeIndex; break; }
+                    }
+                }
             }
             GameManager.Instance.PlayerActivate.ChangeInteractionMode(nextMode);
         }

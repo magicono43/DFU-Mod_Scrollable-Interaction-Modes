@@ -12,6 +12,85 @@
                     "Description": "Reverse What Direction Modes Cycle || Default = False",
                     "$version": "v1",
                     "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+				{
+                    "Value": true,
+                    "Name": "AllowModeLooping",
+                    "Description": "Cycling Through All Modes Will Loop Back To First Or Final Modes || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                }
+            ],
+            "$version": "v1"
+        },
+		{
+            "Name": "IgnoreModesSettings",
+            "Description": "Related To Ignored Interaction Mode Options",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Value": true,
+                    "Name": "EnableIgnoreModes",
+                    "Description": "Allows Interaction Modes To Be Ignored/Skipped Over || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+				{
+                    "Value": false,
+                    "Name": "IgnoreStealMode",
+                    "Description": "If Enabled, Steal Mode Will Be Ignored || Default = False",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+				{
+                    "Value": false,
+                    "Name": "IgnoreGrabMode",
+                    "Description": "If Enabled, Grab Mode Will Be Ignored || Default = False",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+				{
+                    "Value": false,
+                    "Name": "IgnoreInfoMode",
+                    "Description": "If Enabled, Info Mode Will Be Ignored || Default = False",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+				{
+                    "Value": false,
+                    "Name": "IgnoreTalkMode",
+                    "Description": "If Enabled, Talk Mode Will Be Ignored || Default = False",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                }
+            ],
+            "$version": "v1"
+        },
+		{
+            "Name": "MiscSettings",
+            "Description": "Related To Misc Settings And Options",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Value": true,
+                    "Name": "EnableMouseWheelCycling",
+                    "Description": "Allows Use Of The Mouse-Wheel To Through Interaction Modes || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+				{
+                    "Value": false,
+                    "Name": "EnableKeyPressCycling",
+                    "Description": "Allows Cycling Through Interaction Modes By Using The Keybind Below || Default = False",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+				{
+                    "Value": "R",
+                    "Name": "CycleModesKey",
+                    "Description": "Keybind Used To Cycle Through Interaction Modes || Default = R",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.TextKey"
                 }
             ],
             "$version": "v1"
