@@ -3,7 +3,7 @@
     "ModVersion": "1.10",
     "ModAuthor": "Kirk.O",
     "ContactInfo": "kirkoliveri@gmail.com",
-    "DFUnity_Version": "0.14.5",
+    "DFUnity_Version": "1.0.0",
     "ModDescription": "Cycle through interaction modes by scrolling the mouse-wheel up and down, or pressing a keybind.",
     "GUID": "f243399e-1850-41d2-bdab-1369c452680e",
     "Files": [

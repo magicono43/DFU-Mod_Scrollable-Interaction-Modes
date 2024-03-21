@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    9/19/2023, 9:30 PM
-// Last Edit:		3/20/2024, 1:30 AM
+// Last Edit:		3/20/2024, 9:30 PM
 // Version:			1.10
 // Special Thanks:  
 // Modifier:
@@ -85,7 +85,9 @@ namespace ScrollableInteractionModes
             else
             {
                 CycleModeKey = KeyCode.R;
-                Debug.Log("Scrollable Interaction Modes: Invalid cycle modes keybind detected. Setting default.");
+                Debug.Log("Scrollable Interaction Modes: Invalid cycle modes keybind detected. Setting default. 'R' Key");
+                DaggerfallUI.AddHUDText("Scrollable Interaction Modes:", 6f);
+                DaggerfallUI.AddHUDText("Invalid cycle modes keybind detected. Setting default. 'R' Key", 6f);
             }
 
             if (IgnoreModes)
@@ -150,16 +152,16 @@ namespace ScrollableInteractionModes
             {
                 for (int i = 0; i < interactModes.Length; i++)
                 {
-                    currentModeIndex = Mathf.Clamp(currentModeIndex + 1, 0, 3);
+                    currentModeIndex = Mathf.Clamp(currentModeIndex + 1, -1, 3);
                     if (interactModes[currentModeIndex]) { nextMode = (PlayerActivateModes)currentModeIndex; break; }
                 }
 
                 if (ModeLooping && nextMode == currentMode)
                 {
-                    currentModeIndex = 0;
+                    currentModeIndex = -1;
                     for (int i = 0; i < interactModes.Length; i++)
                     {
-                        currentModeIndex = Mathf.Clamp(currentModeIndex + 1, 0, 3);
+                        currentModeIndex = Mathf.Clamp(currentModeIndex + 1, -1, 3);
                         if (interactModes[currentModeIndex]) { nextMode = (PlayerActivateModes)currentModeIndex; break; }
                     }
                 }
@@ -169,16 +171,16 @@ namespace ScrollableInteractionModes
             {
                 for (int i = 0; i < interactModes.Length; i++)
                 {
-                    currentModeIndex = Mathf.Clamp(currentModeIndex - 1, 0, 3);
+                    currentModeIndex = Mathf.Clamp(currentModeIndex - 1, 0, 4);
                     if (interactModes[currentModeIndex]) { nextMode = (PlayerActivateModes)currentModeIndex; break; }
                 }
 
                 if (ModeLooping && nextMode == currentMode)
                 {
-                    currentModeIndex = 3;
+                    currentModeIndex = 4;
                     for (int i = 0; i < interactModes.Length; i++)
                     {
-                        currentModeIndex = Mathf.Clamp(currentModeIndex - 1, 0, 3);
+                        currentModeIndex = Mathf.Clamp(currentModeIndex - 1, 0, 4);
                         if (interactModes[currentModeIndex]) { nextMode = (PlayerActivateModes)currentModeIndex; break; }
                     }
                 }
